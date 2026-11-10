@@ -85,7 +85,8 @@ class _DemoAppState extends State<DemoApp> {
         listenable: _settings,
         builder: (BuildContext context, Widget? _) {
           return MaterialApp(
-            title: 'EduSnap',
+            onGenerateTitle: (BuildContext context) =>
+                AppLocalizations.of(context).app_title,
             debugShowCheckedModeBanner: false,
             locale: _settings.locale,
             supportedLocales: AppLocalizations.supportedLocales,

@@ -469,6 +469,7 @@ Add a format function on the Settings page.
 | `lib/Utils/app_scope.dart` | `InheritedWidget`，向下传 `settings` / `photos` / `journal` |
 | `lib/Utils/formatters.dart` | `formatEntryDate(value, localeName)`、`formatStorageSize(bytes)` |
 | `lib/l10n/app_en.arb` `app_zh.arb` `app_zh_Hant.arb` | 全量文案 + 占位符元数据 |
+| `test/l10n_test.dart` | i18n 三条红线：键集一致 / 占位符一致 / 无死键 |
 | `l10n.yaml` | `arb-dir: lib/l10n`、`output-class: AppLocalizations`、`nullable-getter: false` |
 | `lib/Utils/journal_store.dart` | 追加 `sizeInBytes()` / `deleteFile()` |
 | `lib/Pages/Add/AddPage.dart` | 照片区（相机/相册/移除）+ 权限拒绝对话框 |
@@ -534,3 +535,7 @@ Add a format function on the Settings page.
 - `AC-S3-13`：`deleteUnreferenced(keep)` 只删白名单外的照片，`usedBytes` 随之下降。
 - `AC-S3-14`：`purgeOrphanPhotos()` 会把「选了图但没保存」留下的副本删掉，且不动被条目引用的照片。
 - `AC-S3-15`：点「移除照片」后占位符回来，磁盘上那张文件立即消失。
+
+**本轮新增的验收标准（i18n）**：
+
+- `AC-S3-16`：`test/l10n_test.dart` 三条全绿——三语键集一致、占位符一致、模板无死键。
