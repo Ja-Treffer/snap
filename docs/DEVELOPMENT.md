@@ -60,7 +60,7 @@ flutter test                 # 必须是 All tests passed!
 
 ## 六、提交与仓库
 
-- 远端：`https://github.com/sdhjahjdsa1213/snap`，主线 `main`。
+- 远端：`https://github.com/Ja-Treffer/snap`（原 `sdhjahjdsa1213/snap`，账号改名后跳转到此），主线 `main`。
 - **不擅自 `git commit` / `git push`**，要主人明确开口。
 - 截图、`docs/*.png`、`docs/m1-*.json` 已在 `.gitignore` 里，别硬加。
 
