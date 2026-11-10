@@ -1,20 +1,21 @@
-# EduSnap Pages Demo — 工程文档（v2.4）
+# EduSnap Pages Demo — 工程文档（v2.5）
 
 > **文档地位**：本文件是生成代码前的唯一契约。代码只实现本文档写明的行为；
 > 文档与代码不一致时以本文档为准，并回写修订记录。
 >
 > **来源**：Itchi Technology Limited《Mobile App Development with Flutter》Session 2
 > （`E:\flutter\document\Itchi_Flutter_Session2.pptx.pdf`，正文抽取在
-> `E:\flutter\document\session2-text.txt`）。六段 Prompt 全部来自课件，逐字抄录在
-> §5。
+> `E:\flutter\document\session2-text.txt`）与 Session 3
+> （`C:\Users\doubl\Downloads\Itchi_Flutter_Session3.pptx`，抽取在
+> `E:\flutter\document\session3-text.txt`）。全部 Prompt 逐字抄录在 §5 与 §13.1。
 
 | 元信息 | 值 |
 |---|---|
 | 项目 | `demo_pages`（App 名 EduSnap） |
-| 版本 / 日期 | v2.4 / 2026-11-03 |
-| 状态 | 定稿，代码已按本版生成，analyze / test / build 全绿 |
-| 运行形态 | Web（`localhost:8090`）+ Windows 桌面 + Cursor 内 F5 调试 |
-| 依赖 | 仅 Flutter SDK，零第三方包 |
+| 版本 / 日期 | v2.5 / 2026-11-10 |
+| 状态 | Session 2 + Session 3 已落地，analyze / test / build 全绿 |
+| 运行形态 | Android（模拟器 540×1170）+ Web（`localhost:8090`）+ Windows 桌面 |
+| 依赖 | `path_provider` `image_picker` `permission_handler` `shared_preferences` `intl` `flutter_localizations` |
 
 ---
 
@@ -41,10 +42,11 @@
 ### 1.2 范围外（明确不做）
 
 - 不建独立 `ListPage`（课件点名禁止：HomePage 就是列表页）。
-- Settings 只显示页名 + Back，不做真实设置项（Session 3 起）。
-- 不做本地持久化、i18n、相机相册、网络、主题切换（Session 3/4）。
 - 卡片不显示时间、不加缩略图（课件只要求 title + note）。
 - 不引入任何第三方包，不用命名路由。
+
+> 以上三条是 Session 2 的口径。Session 3 起：Settings 有了语言与存储两条真实设置，
+> 引入了依赖，卡片也加了照片缩略图与创建日期 —— 具体见 §13。
 
 ---
 
@@ -358,3 +360,177 @@ class JournalCard extends StatelessWidget {
 | v2.2 | 2026-11-03 | 新增 `JournalEntry`（P2） |
 | v2.3 | 2026-11-03 | 新增 `JournalCard` + 3 条假数据 + 加载态（P3），Home 改 StatefulWidget |
 | v2.4 | 2026-11-03 | 落地 Session 2 后半全部 Prompt：P4/P5 Add 表单与校验、P6 列表持数据 + `await push` 插最前、P7 Detail 收数据、P8 `Dismissible` 左滑删除、P9 真导航（临时按钮删除、齿轮移到 AppBar 左上）；Challenge 编辑复用已实现（`AddPage(entry:)` + `copyWith`）；Home 目录按课件表格改为 `Pages/HomePage/`；AC 重编为 1–20，测试 16 个全过 |
+| v2.5 | 2026-11-10 | 并入 Session 3（权限 / 相机相册 / 本地存储 / i18n / Challenge 存储格式化）：新增 §13，AC-S3-1…AC-S3-12，新增 `PhotoStore` / `AppSettings` / `AppScope` / `l10n`；依赖从「零第三方」改为 path_provider + image_picker + permission_handler + shared_preferences + intl + flutter_localizations；测试 27 个全过 |
+
+---
+
+## 13. Session 3 · 权限、照片、存储、语言
+
+> 来源：`Itchi_Flutter_Session3.pptx`（36 页，2026-11-10 抽取到
+> `E:\flutter\document\session3-text.txt`）。本节四条 Prompt 为课件原文。
+
+### 13.1 课件 Prompt（逐字）
+
+**P1（p12，权限与依赖）**
+
+```
+Add image_picker and permission_handler.
+Then configure permissions for both platforms:
+iOS — ios/Runner/Info.plist: NSCameraUsageDescription, NSPhotoLibraryUsageDescription
+Android — AndroidManifest.xml: CAMERA, READ_MEDIA_IMAGES (or READ_EXTERNAL_STORAGE)
+After AI adds them, run cmd "flutter pub get" and check for errors.
+```
+
+**P2（p15，Add 页选照片）**
+
+```
+On AddPage, add a button to pick a photo.
+• Use image_picker to open gallery or camera
+• Request permission first with permission_handler
+• If granted, show the selected image on the form
+• If denied, show a dialog that explains the permission is needed and has a button to open the app settings
+• Store the image path on the JournalEntry
+```
+
+**P3（p17，卡片与详情显示照片）**
+
+```
+Update JournalCard and DetailPage:
+• If the JournalEntry has a photo path, show the image
+• If no photo, show a placeholder
+• Keep the layout clean
+```
+
+**P4（p20，本地存储）**
+
+```
+Add shared_preferences (or a simple JSON file).
+In the HomePage controller:
+• On initState, load the list of JournalEntry from local storage
+• When the list changes (add / delete / edit), save it
+• Quit the app and reopen — the entries should still be there
+```
+
+**P5（p24，i18n 骨架）**
+
+```
+Add flutter_localizations and intl support.
+• Update pubspec.yaml
+• Run flutter pub get
+• Enable localization in MaterialApp
+• Also add support of Traditional Chinese
+```
+
+**P6（p26，ARB 文案）**
+
+```
+Create ARB / string files for English and Traditional Chinese.
+• Add the string keys for all UI
+• Provide English and Chinese translations
+• Use the generated localizations in the UI
+```
+
+**P7（p28，语言开关）**
+
+```
+On Settings page, add a language toggle.
+• Switch between English and Chinese
+• Save the choice in local storage
+• Load it on next launch
+```
+
+**P8（p31，日期占位符）**
+
+```
+Update the date display for journal entries to use localization with a placeholder.
+• English: "Created on {date}"
+• Chinese: "{date} 建立"
+• Use a placeholder for the date so the word order can differ between languages.
+• Show the formatted date on the Detail page (and List card if space allows).
+```
+
+**Challenge（p34，存储格式化）**
+
+```
+Add a format function on the Settings page.
+1. Show the size of local storage
+2. Use a placeholder (Chinese 已使用 0 KB / English 0 KB used)
+3. Add Format / Clear buttons with a double confirmation
+4. Clear all entries and their photos
+5. After clearing, the size shows 0 KB
+```
+
+### 13.2 新增/改动的文件
+
+| 文件 | 职责 |
+|---|---|
+| `lib/Utils/photo_store.dart` | 照片落盘：`import()` 复制进 `documents/photos/`，`pathOf()` 同步取路径，`clearAll()` / `usedBytes()` |
+| `lib/Utils/app_settings.dart` | 语言偏好（`ChangeNotifier` + `shared_preferences`），`system` 走系统语言 |
+| `lib/Utils/app_scope.dart` | `InheritedWidget`，向下传 `settings` / `photos` / `journal` |
+| `lib/Utils/formatters.dart` | `formatEntryDate(value, localeName)`、`formatStorageSize(bytes)` |
+| `lib/l10n/app_en.arb` `app_zh.arb` `app_zh_Hant.arb` | 全量文案 + 占位符元数据 |
+| `l10n.yaml` | `arb-dir: lib/l10n`、`output-class: AppLocalizations`、`nullable-getter: false` |
+| `lib/Utils/journal_store.dart` | 追加 `sizeInBytes()` / `deleteFile()` |
+| `lib/Pages/Add/AddPage.dart` | 照片区（相机/相册/移除）+ 权限拒绝对话框 |
+| `lib/Pages/Settings/SettingsPage.dart` | 语言四选一、存储用量、双重确认清空 |
+
+### 13.3 验收标准（Session 3）
+
+| ID | 操作 | 期望 |
+|---|---|---|
+| AC-S3-1 | 打开 Add | 有 `pickFromGallery` / `pickFromCamera`，照片位显示 `addPhotoPlaceholder` |
+| AC-S3-2 | 列表卡片 | 无照片时每张卡有 `cardPhotoPlaceholder`，无 `cardPhoto` |
+| AC-S3-3 | 有照片的卡 | 渲染 `Image.file`（key `cardPhoto`） |
+| AC-S3-4 | Detail | 有 `DetailCreatedOn`，文案以 `Created on ` 开头且含年份；无照片显示 `detailPhotoPlaceholder` |
+| AC-S3-5 | Settings 语言 | 点 `languageChinese` 后界面变 `设置`，`settings.localeCode == 'zh'` |
+| AC-S3-6 | 清空 | 两次确认（先 Cancel 不生效）；确认后 `0 KB used`，回列表为 `emptyList` |
+| AC-S3-7 | 语言持久化 | 设 `zh_Hant` 后重建 `AppSettings` 仍为 `zh_Hant`，`toLanguageTag() == 'zh-Hant'` |
+| AC-S3-8 | 存储文案 | `formatStorageSize`：`0`→`0 KB`、`651`→`0 KB`、`2048`→`2 KB`、3MB→`3.0 MB` |
+| AC-S3-9 | 权限拒绝 | 未授予且用户拒授 → `photoPermissionDialog`，含 `permissionOpenSettings` |
+| AC-S3-10 | 重启 | 强杀进程重开，条目与语言都还在（模拟器实测） |
+| AC-S3-11 | 静态检查 | `flutter analyze` → `No issues found!` |
+| AC-S3-12 | 测试 | `flutter test` → 27/27 通过 |
+
+### 13.4 边界与异常
+
+| 情况 | 行为 |
+|---|---|
+| 相册里选了超大图 | `pickImage(maxWidth: 1600, imageQuality: 85)` 先压缩再落盘 |
+| 用户删掉条目 | 连带删除 `photos/` 下对应文件 |
+| 编辑时换照片 | 旧文件删除，新文件入库 |
+| `journal.json` 损坏 | 改名 `journal.json.bak-<ms>`，以空列表启动（不覆盖用户数据） |
+| 清空后立刻看大小 | `formatStorageSize` 向下取整，`651` 字节也显示 `0 KB` |
+| 清空后条数 | `SettingsPage.entryCount` 传 **getter** `int Function()`，否则清空后副标题还显示旧值（实测抓到的 bug） |
+| iOS 缺 `NSCameraUsageDescription` | 一开相机就被系统杀掉，所以两条描述必须写在 `Info.plist` |
+
+### 13.5 技术债台账（Session 3 追加）
+
+| 债务 | 原因 | 偿还时机 |
+|---|---|---|
+| 相册用 `READ_MEDIA_IMAGES` 声明但实际走 Photo Picker | 课件要求声明；现代 Android 不需要该权限 | Session 4 复核 |
+| `permission_handler` 逼着 `compileSdk = 37` | 13.x 的 AAR 元数据要求，Flutter 默认还是 36 | 等 Flutter 默认值跟上后改回 |
+| 照片只存文件名不存缩略图 | 列表直接 `Image.file`，大图会吃内存 | 需要时加缓存缩略图 |
+| 语言只做 en / zh / zh_Hant | 课件只要这三种 | Session 4 |
+
+## 14. 技术债偿还记录（2026-11-10）
+
+本轮清理的债务与对应验收：
+
+| 债务 | 处理 | 验收 |
+|---|---|---|
+| 选图后放弃表单，照片文件残留在 `photos/` | `PhotoStore.deleteUnreferenced` + `HomePageController.purgeOrphanPhotos`；启动、取消返回、点移除三处触发 | AC-S3-13 / AC-S3-14 |
+| 点「移除照片」只清 UI 不删文件 | `AddPage._removePhoto` 先删文件再 `setState` | AC-S3-15 |
+| 删除在 Windows 上偶发失败（句柄未释放） | `PhotoStore.delete` 失败重试一次，仍失败交给下次启动回收 | 手工验证 |
+| 卡片缩略图按原图解码吃内存 | `Image.file(cacheWidth: (56 * 3).round())` | 目测 + 无回归 |
+| `AddPage.imagePicker` 注入被字段覆盖，测试驱动不到真实路径 | 改 getter `_picker => widget.imagePicker ?? _defaultPicker` | AC-S3-14 / AC-S3-15 |
+| 权限在 widget 测试里没有平台实现 | 用 `PermissionHandlerPlatform` 假实现 + dev 依赖补齐 | 新增用例可跑 |
+
+**复核后仍保留的债务**：`compileSdk = 37`（依赖要求）、`READ_MEDIA_IMAGES` 声明（课件要求）、照片只有原图无缩略图缓存、语言仅三语。保留理由与偿还时机见 §13.5。
+
+**注意**：`docs/rag/07-pitfalls.md` 第 1、2、12 条即本轮结论，改这些行为时三处（代码、spec、rag）要一起改。
+
+**本轮新增的验收标准**（写入 `test/photo_store_test.dart`）：
+
+- `AC-S3-13`：`deleteUnreferenced(keep)` 只删白名单外的照片，`usedBytes` 随之下降。
+- `AC-S3-14`：`purgeOrphanPhotos()` 会把「选了图但没保存」留下的副本删掉，且不动被条目引用的照片。
+- `AC-S3-15`：点「移除照片」后占位符回来，磁盘上那张文件立即消失。

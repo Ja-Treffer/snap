@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.itchi.demo_pages"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android 13.x ships an AAR that demands compileSdk 37
+    // (Android 17), which is higher than Flutter's current default of 36.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

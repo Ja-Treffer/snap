@@ -50,8 +50,15 @@ app.*.map.json
 # Local Chrome profile used for screenshot runs
 .chrome-profile/
 
-# Run screenshots stay local; the repo ships code + written specs only
+# Verification screenshots and one-off dumps stay local; the repo ships code + written specs only
+.local/
 docs/*.png
+docs/*.json
 
-# Throwaway capture of the on-device journal.json used during M1 verification
-docs/m1-*.json
+# Local-only tooling state (issue tracker root, agent scaffolding copies)
+.scratch/
+docs/agents/
+
+# Editor / OS noise that keeps reappearing
+*.bak-*
+android/.kotlin/

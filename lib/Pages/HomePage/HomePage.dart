@@ -1,7 +1,11 @@
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../Component/JournalCard/JournalCard.dart';
 import '../../Models/JournalEntry.dart';
+import '../../Utils/app_settings.dart';
+import '../../Utils/formatters.dart';
+import '../../l10n/app_localizations.dart';
 import '../Add/AddPage.dart';
 import '../Detail/DetailPage.dart';
 import '../Settings/SettingsPage.dart';
@@ -56,39 +60,49 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Waits for the Add page to hand back a new entry, then puts it on top.
+  /// A cancelled form may have copied a photo to storage already, so the list
+  /// sweeps orphans right after it closes.
   Future<void> _openAdd() async {
     final JournalEntry? created = await Navigator.of(context).push<JournalEntry>(
       MaterialPageRoute<JournalEntry>(builder: (_) => const AddPage()),
     );
     if (created != null) {
       _controller.addEntry(created);
+    } else {
+      unawaited(_controller.purgeOrphanPhotos());
     }
   }
 
   Future<void> _openSettings() async {
     await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsPage(
+          entryCount: () => _controller.count,
+          onClearAll: _controller.clearAll,
+        ),
+      ),
     );
   }
 
   /// Swipe-left deletes, but only after the user confirms it.
   Future<bool> _confirmDelete(JournalEntry entry) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Delete this entry?'),
-          content: Text('"${entry.title}" will be removed from the list.'),
+          title: Text(l10n.dialog_delete_title),
+          content: Text(l10n.dialog_delete_body(entry.title)),
           actions: <Widget>[
             TextButton(
               key: const Key('deleteCancel'),
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.btn_cancel),
             ),
             FilledButton(
               key: const Key('deleteConfirm'),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Delete'),
+              child: Text(l10n.btn_delete),
             ),
           ],
         );
@@ -97,8 +111,9 @@ class _HomePageState extends State<HomePage> {
     return confirmed ?? false;
   }
 
-  Widget _buildDismissible(JournalEntry entry) {
+  Widget _buildDismissible(JournalEntry entry, String localeCode) {
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     return Dismissible(
       key: ObjectKey(entry),
@@ -114,25 +129,37 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Icon(Icons.delete_outline, color: colors.onErrorContainer),
       ),
-      child: JournalCard(entry: entry, onTap: () => _openDetail(entry)),
+      child: JournalCard(
+        entry: entry,
+        imagePath: _controller.photoPathOf(entry),
+        createdLabel: l10n.entry_created_on(
+          formatEntryDate(entry.createdAt, localeCode),
+        ),
+        onTap: () => _openDetail(entry),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String localeCode = AppSettings.codeOf(
+      Localizations.localeOf(context),
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_controller.label),
+        title: Text(l10n.homepage_title),
         leading: IconButton(
           key: const Key('openSettings'),
-          tooltip: 'Settings',
+          tooltip: l10n.btn_settings,
           icon: const Icon(Icons.settings_outlined),
           onPressed: _openSettings,
         ),
         actions: <Widget>[
           IconButton(
             key: const Key('openAdd'),
-            tooltip: 'Add entry',
+            tooltip: l10n.btn_add_entry,
             icon: const Icon(Icons.add),
             onPressed: _openAdd,
           ),
@@ -148,8 +175,11 @@ class _HomePageState extends State<HomePage> {
           final List<JournalEntry> entries = _controller.entries;
 
           if (entries.isEmpty) {
-            return const Center(
-              child: Text('No entries yet', key: Key('emptyList')),
+            return Center(
+              child: Text(
+                l10n.homepage_empty,
+                key: const Key('emptyList'),
+              ),
             );
           }
 
@@ -159,7 +189,7 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (BuildContext context, int index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _buildDismissible(entries[index]),
+                child: _buildDismissible(entries[index], localeCode),
               );
             },
           );
@@ -168,3 +198,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

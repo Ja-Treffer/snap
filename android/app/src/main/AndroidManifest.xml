@@ -1,8 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- image_picker: taking a photo needs CAMERA. Picking from the gallery goes
-         through the system Photo Picker (Android 13+), so READ_MEDIA_IMAGES is
-         deliberately NOT declared. -->
+    <!-- Session 3, Part 01: the course asks for CAMERA + READ_MEDIA_IMAGES.
+         CAMERA is really needed (permission_handler requests it before the
+         camera opens). READ_MEDIA_IMAGES is declared to match the course; on
+         Android 13+ the gallery still goes through the system Photo Picker, so
+         nothing here is used to scan the user's photos. -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="demo_pages"

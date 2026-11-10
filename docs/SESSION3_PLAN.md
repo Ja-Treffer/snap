@@ -235,3 +235,66 @@ dependencies:
 实现落点：`lib/Pages/Add/AddPageController.dart`（`hasNote` / `isBlank` / `untitled` / `buildEntry()` 解析标题）+ `lib/Pages/Add/AddPage.dart`（`_save()` 判 `isBlank`、对话框改 `_showEmptyEntry()`）。测试 AC-7 改写 + 新增 AC-7b。
 
 台账：`Untitled` 目前是硬编码英文，M5（gen-l10n）时必须搬进 ARB 的 `entryUntitled`。
+
+---
+
+## 11. 真课件到手后的对齐（2026-11-10）
+
+主人 2026-11-10 拿来真课件：`C:\Users\doubl\Downloads\Itchi_Flutter_Session3.pptx`（36 页），
+正文抽到 `E:\flutter\document\session3-text.txt`。本节的计划文档到此为止，
+**以下以真课件为准**，全文逐字 Prompt 收在 `docs/PROJECT_SPEC.md` §13.1。
+
+### 11.1 计划 vs 真课件
+
+| 主题 | 本计划的打算 | 真课件要求 | 结论 |
+|---|---|---|---|
+| 存储 | JSON 文件 + `path_provider` | 「shared_preferences **或**简单 JSON 文件」 | 保持 JSON：条目含照片路径，JSON 更直观 |
+| 照片 | M3 才做 picker | P2 就要求 Add 页选图 + 落 `JournalEntry.photoPath` | 已实现 |
+| 权限 | 只说装 `permission_handler` | 要求"先申请权限再打开 picker，拒绝时弹框给一个去设置的按钮" | 已实现 `openAppSettings()` |
+| i18n | gen-l10n + ARB | 同上，另加**繁体中文** | 已加 `app_zh_Hant.arb` |
+| 日期 | 计划里没有 | P8 要求占位符 `Created on {date}` / `{date} 建立` | 已实现 `entry_created_on` |
+| Challenge | 计划里没有 | 存储用量 + Format/Clear + 双重确认 + 清空后 0 KB | 已实现（`settings_storage_used`、`clearAllButton`） |
+
+### 11.2 里程碑状态
+
+| 里程碑 | 内容 | 状态 |
+|---|---|---|
+| M1 | 数据落盘（JSON 原子写、坏文件隔离） | ✅ 2026-11-03 |
+| M2 | 首启播种 + DI 缝 + in-memory store | ✅ 2026-11-03 |
+| M3 | 相机/相册选图 + 权限 + 照片落盘 | ✅ 2026-11-10 |
+| M4 | 卡片与详情显示照片 / 占位 | ✅ 2026-11-10 |
+| M5 | gen-l10n + 三套 ARB（en / zh / zh_Hant） | ✅ 2026-11-10 |
+| M6 | Settings（语言开关 + 存储用量 + 双重确认清空） | ✅ 2026-11-10 |
+
+### 11.3 回归结果
+
+- `flutter analyze` → `No issues found!`
+- `flutter test` → **27/27 通过**（flow_test 19 + session3_test 8 + models/card/store 若干）
+- `flutter build apk --debug` 通过；`flutter build web --release` 通过；`compileSdk` 提到 37（`permission_handler_android` 13.x 的 AAR 元数据要求）
+
+### 11.4 模拟器实测（`emulator-5554`，540×1170，2026-11-10）
+
+| 步骤 | 结果 | 证据 |
+|---|---|---|
+| 首次进入列表（升级后首启） | 旧数据在，每张卡有缩略图占位，副标题 `Created on Nov 3, 2026` | `docs/s3-1-home.png` |
+| 打开 Add | `Photo` 区占位 + `From gallery` / `Take photo` 两个按钮 | `docs/s3-2-add.png` |
+| 点 `From gallery` | 弹出系统权限框「Allow demo_pages to access photos and videos」 | `docs/s3-3-permission.png` |
+| 允许后 | 打开系统 Photo Picker | `docs/s3-4-picker.png` |
+| 选一张图 | 表单里出现预览 + `Remove photo`；文件落盘 `app_flutter/photos/p-mwakhjdr-0.jpg`（40 KB） | `docs/s3-5-preview.png` |
+| 保存回列表 | 新条目在最上，卡片左侧显示真实缩略图 | `docs/s3-6-list-with-photo.png` |
+| 打开 Detail | 顶部 4:3 大图 + `With photo` + `Created on Nov 10, 2026` + `No note` | `docs/s3-7-detail.png` |
+| 打开 Settings | `39 KB used` / 6 条 / 四个语言单选项 | `docs/s3-8-settings.png` |
+| 点「简体中文」 | 立刻变 `设置` / `语言` / `已使用 39 KB` / `清空所有记录` / `返回` | `docs/s3-9-settings-zh.png` |
+| 强杀进程再开 | 语言仍是中文；卡片副标题 `2026年11月10日 建立`（占位符语序正确） | `docs/s3-10-list-zh.png` |
+| 清空 → 第一次确认 | `清空全部?` / `将删除 6 条记录及全部照片。` | `docs/s3-11-clear-1.png` |
+| 清空 → 第二次确认 | `确定要清空吗?` / `此操作无法撤销。` | `docs/s3-12-clear-2.png` |
+| 确认后 | `已使用 0 KB`、`journal.json` 被删、`photos/` 为空、SnackBar `已清空` | `docs/s3-13-cleared.png` |
+| 返回列表 | 空态 `还没有记录` | `docs/s3-15-empty.png` |
+
+**实测抓到的 bug（已修）**：清空后 Settings 副标题（条数）仍显示 `6`。
+原因是 `entryCount` 传的是 int 值，清空发生在当前页，值早就过期。
+改成传 `int Function() entryCount` 后，清空立刻显示 `0`（`docs/s3-14-cleared-count.png`），
+测试仍 27/27。
+
+**本轮新增台账**：选完照片就 `import()` 落盘，用户点取消/返回会留下孤儿文件（下次启动不会自动清）。
+偿还时机：Session 4 打磨时加"保存成功才落盘，否则删除临时文件"或启动时清理未被引用的照片。

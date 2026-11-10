@@ -4,15 +4,20 @@ import 'package:flutter/foundation.dart';
 
 import '../../Models/JournalEntry.dart';
 import '../../Utils/journal_store.dart';
+import '../../Utils/photo_store.dart';
 
 /// Controller for the List page (HomePage).
 ///
 /// Owns the entries and the loading flag; the page only observes and paints.
-/// Persistence is delegated to [JournalStore] — this class never touches files,
-/// and the page never touches this class's storage.
+/// Persistence and photo files are delegated to [JournalStore] / [PhotoStore] —
+/// this class never touches the file system directly.
 class HomePageController extends ChangeNotifier {
-  HomePageController({JournalStore? store, this.loadDelay = defaultLoadDelay})
-    : _store = store ?? JournalStore();
+  HomePageController({
+    JournalStore? store,
+    PhotoStore? photos,
+    this.loadDelay = defaultLoadDelay,
+  }) : _store = store ?? JournalStore(),
+       _photos = photos ?? PhotoStore();
 
   static const Duration defaultLoadDelay = Duration(milliseconds: 300);
 
@@ -20,13 +25,12 @@ class HomePageController extends ChangeNotifier {
   final Duration loadDelay;
 
   final JournalStore _store;
+  final PhotoStore _photos;
   final List<JournalEntry> _entries = <JournalEntry>[];
 
   bool _loading = false;
 
   bool get isLoading => _loading;
-
-  String get label => 'List';
 
   /// Read-only view; callers cannot mutate the list behind the controller's back.
   List<JournalEntry> get entries => List<JournalEntry>.unmodifiable(_entries);
@@ -57,6 +61,10 @@ class HomePageController extends ChangeNotifier {
     ];
   }
 
+  /// Absolute path for an entry's photo, or null when it has none. Synchronous
+  /// because [PhotoStore.ensureReady] ran at startup.
+  String? photoPathOf(JournalEntry entry) => _photos.pathOf(entry.photoPath);
+
   Future<void> load() async {
     _loading = true;
     notifyListeners();
@@ -75,6 +83,10 @@ class HomePageController extends ChangeNotifier {
       await _store.save(_entries);
     }
 
+    // Photos whose entry is gone (user abandoned the form, or the app was
+    // killed between import and save) would otherwise sit in storage forever.
+    unawaited(purgeOrphanPhotos());
+
     _loading = false;
     notifyListeners();
   }
@@ -87,6 +99,7 @@ class HomePageController extends ChangeNotifier {
   }
 
   /// Replaces [oldEntry] by identity; used after the Detail page edits it.
+  /// The replaced photo file is deleted so edited-out images do not pile up.
   bool replaceEntry(JournalEntry oldEntry, JournalEntry updated) {
     final int index = _entries.indexWhere(
       (JournalEntry item) => identical(item, oldEntry),
@@ -97,6 +110,9 @@ class HomePageController extends ChangeNotifier {
     _entries[index] = updated;
     notifyListeners();
     unawaited(_persist());
+    if (oldEntry.photoPath != null && oldEntry.photoPath != updated.photoPath) {
+      unawaited(_photos.delete(oldEntry.photoPath));
+    }
     return true;
   }
 
@@ -105,9 +121,31 @@ class HomePageController extends ChangeNotifier {
     if (removed) {
       notifyListeners();
       unawaited(_persist());
+      unawaited(_photos.delete(entry.photoPath));
     }
     return removed;
   }
 
+  /// Empties the list, deletes every photo and the journal file. Returns the
+  /// number of entries that were removed so Settings can report it.
+  Future<int> clearAll() async {
+    final int removed = _entries.length;
+    _entries.clear();
+    notifyListeners();
+    await _photos.clearAll();
+    await _store.deleteFile();
+    return removed;
+  }
+
   Future<void> _persist() => _store.save(_entries);
+
+  /// Deletes every stored photo that no current entry references. Called after
+  /// loading, and whenever the Add form is closed without saving, so an
+  /// abandoned pick cannot accumulate. Returns how many files were removed.
+  Future<int> purgeOrphanPhotos() {
+    return _photos.deleteUnreferenced(<String>{
+      for (final JournalEntry entry in _entries)
+        if (entry.photoPath case final String name) name,
+    });
+  }
 }

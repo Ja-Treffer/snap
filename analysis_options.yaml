@@ -15,6 +15,7 @@ analyzer:
     - android/**
     - web/**
     - windows/**
+    - ios/**
   errors:
     # 课件 slide 明确要求 Pages/<Name>/<Name>Page.dart + <Name>PageController.dart
     # 这种 PascalCase 文件名（DetailPage.dart、AddPageController.dart…）。

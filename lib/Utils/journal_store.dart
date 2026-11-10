@@ -130,6 +130,54 @@ class JournalStore {
     return File('${directory.path}${Platform.pathSeparator}$fileName');
   }
 
+  /// Size of the journal file in bytes, used by the Settings page. Counts the
+  /// writer's temporary file too, so an interrupted save is not invisible.
+  Future<int> sizeInBytes() async {
+    if (_memoryMode) {
+      return 0;
+    }
+    int total = 0;
+    try {
+      final File file = await _file();
+      if (await file.exists()) {
+        total += await file.length();
+      }
+      final File tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) {
+        total += await tmp.length();
+      }
+    } catch (_) {
+      return 0;
+    }
+    return total;
+  }
+
+  /// Deletes the persisted journal and any quarantined copies (used by "clear
+  /// all"). Photos are removed by [PhotoStore.clearAll].
+  Future<void> deleteFile() async {
+    if (_memoryMode) {
+      _memoryEntries = <JournalEntry>[];
+      return;
+    }
+    try {
+      final File file = await _file();
+      final Directory directory = file.parent;
+      await for (final FileSystemEntity entity in directory.list()) {
+        final String name = entity.uri.pathSegments.last;
+        final bool isJournal =
+            name == fileName ||
+            name == '$fileName.tmp' ||
+            name.startsWith('$fileName.bak-');
+        if (isJournal && entity is File) {
+          await entity.delete();
+        }
+      }
+      _existedBefore = true;
+    } catch (_) {
+      // Nothing on disk to remove.
+    }
+  }
+
   String _encode(List<JournalEntry> entries) {
     return const JsonEncoder.withIndent('  ').convert(<String, Object?>{
       'version': schemaVersion,

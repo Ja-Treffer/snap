@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../Models/JournalEntry.dart';
+import '../../Utils/app_scope.dart';
+import '../../Utils/app_settings.dart';
+import '../../Utils/formatters.dart';
+import '../../l10n/app_localizations.dart';
 import '../Add/AddPage.dart';
 import 'DetailPageController.dart';
 
@@ -44,26 +50,63 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final DetailPageController controller = DetailPageController(entry: _entry);
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final DetailPageController controller = DetailPageController(
+      entry: _entry,
+      untitledLabel: l10n.entry_untitled,
+      emptyNoteLabel: l10n.entry_no_note,
+    );
+    final String localeCode = AppSettings.codeOf(
+      Localizations.localeOf(context),
+    );
+    final String? photoPath = AppScope.of(context).photos.pathOf(
+      _entry.photoPath,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.label),
+        title: Text(l10n.detail_title),
         actions: <Widget>[
           TextButton(
             key: const Key('DetailEdit'),
             onPressed: _edit,
-            child: const Text('Edit'),
+            child: Text(l10n.btn_edit),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: <Widget>[
+          if (photoPath != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Image.file(
+                  File(photoPath),
+                  key: const Key('detailPhoto'),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _photoPlaceholder(theme, l10n),
+                ),
+              ),
+            )
+          else
+            _photoPlaceholder(theme, l10n),
+          const SizedBox(height: 16),
           Text(
             controller.title,
             key: const Key('DetailTitle'),
             style: theme.textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.entry_created_on(
+              formatEntryDate(_entry.createdAt, localeCode),
+            ),
+            key: const Key('DetailCreatedOn'),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -75,7 +118,35 @@ class _DetailPageState extends State<DetailPage> {
           TextButton(
             key: const Key('DetailBack'),
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Back'),
+            child: Text(l10n.btn_back),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _photoPlaceholder(ThemeData theme, AppLocalizations l10n) {
+    return Container(
+      key: const Key('detailPhotoPlaceholder'),
+      height: 140,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(
+            Icons.photo_outlined,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.entry_no_photo,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

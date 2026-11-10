@@ -2,16 +2,23 @@ import '../../Models/JournalEntry.dart';
 
 /// Controller for the Detail page.
 ///
-/// Pure presentation logic: the page hands it the entry it received and asks for
-/// the strings to show. No widgets, no storage.
+/// Pure presentation logic: the page hands it the entry it received plus the two
+/// fallback labels (they depend on the active language, so they are injected
+/// rather than hard-coded here). No widgets, no storage.
 class DetailPageController {
-  DetailPageController({required this.entry});
+  DetailPageController({
+    required this.entry,
+    required this.untitledLabel,
+    required this.emptyNoteLabel,
+  });
 
   final JournalEntry entry;
+  final String untitledLabel;
+  final String emptyNoteLabel;
 
-  String get label => 'Detail';
+  String get title => entry.title.isEmpty ? untitledLabel : entry.title;
 
-  String get title => entry.title.isEmpty ? 'Untitled' : entry.title;
+  String get note => entry.note.isEmpty ? emptyNoteLabel : entry.note;
 
-  String get note => entry.note.isEmpty ? 'No note' : entry.note;
+  bool get hasPhoto => entry.photoPath != null && entry.photoPath!.isNotEmpty;
 }
