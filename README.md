@@ -1,4 +1,4 @@
-# EduSnap — Flutter 课程示范工程
+# Snap — Flutter demo
 
 Itchi Flutter Session 1–3 的完整落地：四个页面（List / Detail / Add / Settings）、JSON 本地持久化、相机与相册选图、三语本地化（EN / 简体 / 繁體）。
 
