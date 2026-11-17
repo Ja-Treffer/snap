@@ -45,5 +45,13 @@
   "settings_clear_body": "将删除 {count} 条记录及全部照片。",
   "settings_clear_again_title": "确定要清空吗？",
   "settings_clear_again_body": "此操作无法撤销。",
+  "settings_background": "背景",
+  "settings_background_none": "选择图片",
+  "settings_background_change": "更换图片",
+  "settings_background_remove": "移除背景图",
+  "settings_background_opacity": "透明度",
+  "settings_background_failed": "无法打开相册。",
+  "settings_about": "关于",
+  "settings_version": "版本 {version}（构建 {build}）",
   "settings_cleared": "已清空"
 }

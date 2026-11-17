@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'app_settings.dart';
+import 'duo_layout.dart';
 import 'journal_store.dart';
 import 'photo_store.dart';
 
@@ -15,12 +16,17 @@ class AppScope extends InheritedWidget {
     required this.settings,
     required this.photos,
     required this.journal,
+    this.duo,
     required super.child,
   });
 
   final AppSettings settings;
   final PhotoStore photos;
   final JournalStore journal;
+
+  /// Session 4 · PART 04. Optional so existing tests can keep building a scope
+  /// without a platform bridge; pages fall back to "no side rail" when absent.
+  final DuoLayoutController? duo;
 
   static AppScope of(BuildContext context) {
     final AppScope? scope = maybeOf(context);
@@ -36,6 +42,7 @@ class AppScope extends InheritedWidget {
   bool updateShouldNotify(AppScope oldWidget) {
     return settings != oldWidget.settings ||
         photos != oldWidget.photos ||
-        journal != oldWidget.journal;
+        journal != oldWidget.journal ||
+        duo != oldWidget.duo;
   }
 }

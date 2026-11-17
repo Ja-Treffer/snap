@@ -295,7 +295,12 @@ class _AddPageState extends State<AddPage> {
         : l10n.btn_save;
 
     return Scaffold(
-      appBar: AppBar(title: Text(label)),
+      appBar: AppBar(
+        // PART 04: the native Duo rail owns Back when it is active.
+        automaticallyImplyLeading:
+            !(AppScope.maybeOf(context)?.duo?.railActive ?? false),
+        title: Text(label),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(

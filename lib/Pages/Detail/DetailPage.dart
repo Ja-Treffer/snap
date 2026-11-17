@@ -65,6 +65,10 @@ class _DetailPageState extends State<DetailPage> {
 
     return Scaffold(
       appBar: AppBar(
+        // PART 04: when the native Duo rail carries Back, drop ours so the user
+        // does not see two of them.
+        automaticallyImplyLeading:
+            !(AppScope.maybeOf(context)?.duo?.railActive ?? false),
         title: Text(l10n.detail_title),
         actions: <Widget>[
           TextButton(

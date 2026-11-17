@@ -153,6 +153,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_clear_again_body => '此操作无法撤销。';
 
   @override
+  String get settings_background => '背景';
+
+  @override
+  String get settings_background_none => '选择图片';
+
+  @override
+  String get settings_background_change => '更换图片';
+
+  @override
+  String get settings_background_remove => '移除背景图';
+
+  @override
+  String get settings_background_opacity => '透明度';
+
+  @override
+  String get settings_background_failed => '无法打开相册。';
+
+  @override
+  String get settings_about => '关于';
+
+  @override
+  String settings_version(String version, String build) {
+    return '版本 $version（构建 $build）';
+  }
+
+  @override
   String get settings_cleared => '已清空';
 }
 
@@ -302,6 +328,32 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get settings_clear_again_body => '此操作無法復原。';
+
+  @override
+  String get settings_background => '背景';
+
+  @override
+  String get settings_background_none => '選擇圖片';
+
+  @override
+  String get settings_background_change => '更換圖片';
+
+  @override
+  String get settings_background_remove => '移除背景圖';
+
+  @override
+  String get settings_background_opacity => '透明度';
+
+  @override
+  String get settings_background_failed => '無法開啟相簿。';
+
+  @override
+  String get settings_about => '關於';
+
+  @override
+  String settings_version(String version, String build) {
+    return '版本 $version（組建 $build）';
+  }
 
   @override
   String get settings_cleared => '已清空';

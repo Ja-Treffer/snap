@@ -1,9 +1,11 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../Component/JournalCard/JournalCard.dart';
 import '../../Models/JournalEntry.dart';
+import '../../Utils/app_scope.dart';
 import '../../Utils/app_settings.dart';
+import '../../Utils/duo_layout.dart';
 import '../../Utils/formatters.dart';
 import '../../l10n/app_localizations.dart';
 import '../Add/AddPage.dart';
@@ -140,12 +142,47 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// PART 04: fully open Duo (or any window wide enough) gets two columns.
+  /// Both columns scroll independently, so nothing has to know the card height.
+  Widget _twoPaneList(List<JournalEntry> entries, String localeCode) {
+    final List<JournalEntry> left = <JournalEntry>[];
+    final List<JournalEntry> right = <JournalEntry>[];
+    for (int i = 0; i < entries.length; i++) {
+      (i.isEven ? left : right).add(entries[i]);
+    }
+
+    Widget column(List<JournalEntry> items) {
+      return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        itemCount: items.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildDismissible(items[index], localeCode),
+          );
+        },
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(child: column(left)),
+        const SizedBox(width: 8),
+        Expanded(child: column(right)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String localeCode = AppSettings.codeOf(
       Localizations.localeOf(context),
     );
+    final DuoLayoutController? duo = AppScope.maybeOf(context)?.duo;
+    final bool twoPanes =
+        duo?.wantsTwoPanes(MediaQuery.sizeOf(context)) ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -181,6 +218,10 @@ class _HomePageState extends State<HomePage> {
                 key: const Key('emptyList'),
               ),
             );
+          }
+
+          if (twoPanes) {
+            return _twoPaneList(entries, localeCode);
           }
 
           return ListView.builder(

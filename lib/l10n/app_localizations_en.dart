@@ -154,5 +154,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_clear_again_body => 'This cannot be undone.';
 
   @override
+  String get settings_background => 'Background';
+
+  @override
+  String get settings_background_none => 'Choose an image';
+
+  @override
+  String get settings_background_change => 'Change image';
+
+  @override
+  String get settings_background_remove => 'Remove background';
+
+  @override
+  String get settings_background_opacity => 'Opacity';
+
+  @override
+  String get settings_background_failed => 'Could not open the gallery.';
+
+  @override
+  String get settings_about => 'About';
+
+  @override
+  String settings_version(String version, String build) {
+    return 'Version $version (build $build)';
+  }
+
+  @override
   String get settings_cleared => 'Cleared';
 }

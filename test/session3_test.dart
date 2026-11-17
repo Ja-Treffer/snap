@@ -162,6 +162,14 @@ void main() {
 
     await tester.tap(find.byKey(const Key('openSettings')));
     await tester.pumpAndSettle();
+    // Session 4 grew the page (Background section), so the destructive button
+    // sits below a 600 px viewport. Rather than scroll (which leaves the list
+    // mid-fling), give this test a tall window.
+    tester.view.physicalSize = const Size(1000, 2200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('clearAllButton')));
     await tester.pumpAndSettle();
 

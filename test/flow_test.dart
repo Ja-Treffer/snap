@@ -93,6 +93,13 @@ void main() {
 
     await tester.tap(find.byKey(const Key('openSettings')));
     await tester.pumpAndSettle();
+    // Session 4 added the About/version block, so Back now sits below the fold
+    // on a 600 px test viewport — bring it into view before tapping.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('SettingsBack')),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byKey(const Key('SettingsBack')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('SettingsBack')));

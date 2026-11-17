@@ -62,10 +62,26 @@ chrome --app=http://127.0.0.1:8090/ --window-size=430,860
 
 手机宽度截图：headless Chrome 有最小视口（约 500px），直接 `--window-size=420,880` 会按 800 排版再裁切。要么用 900×700 截，要么在 `build\web` 放一个 `<iframe src="/" width=420 height=880>` 的壳页再截。
 
+## 图标（Session 4）
+
+```powershell
+# 换图：替换 assets\icon\icon_1024.png 后
+dart run flutter_launcher_icons
+```
+
+产物：`android\app\src\main\res\mipmap-*\ic_launcher.png`（5 档）+
+`ios\Runner\Assets.xcassets\AppIcon.appiconset\`（22 个文件）。**别看也別手改**，要改就换源图重跑。
+验证是否进了包：解 `build\app\outputs\flutter-apk\app-debug.apk`，看 `res/mipmap-xxhdpi-v4/ic_launcher.png`。
+
+## 版本号（Session 4）
+
+`pubspec.yaml` 的 `version: 1.1.0+2` 是**构建时**写进产物的；改完必须重新 `flutter run` / `flutter build`，
+热重载、刷新网页都不算。web 产物可以直接核对 `build\web\version.json`。
+
 ## 编辑器
 
 Cursor 3.27.12（`%LOCALAPPDATA%\Programs\cursor`，CLI `cursor.cmd` 已在 PATH）已装 Flutter 扩展，`.vscode\launch.json` 里有 Windows / Chrome / web-server(8090) / 单文件测试四套配置。F5 起热重载，等价于 `flutter run -d windows|chrome|web-server`。
 
 ## 最后核对
 
-2026-11-10。
+2026-11-17（补图标生成与版本号两节）。

@@ -84,6 +84,34 @@
 **原因**：AVD 1080×2400 + `showDeviceFrame=yes` + 软件渲染。
 **修法**：见 06 的 AVD 配置；窗口句柄在 `qemu-system-x86_64` 上，必要时 `SetWindowPos` 摁回屏内。
 
+## 16. 改了 `version:` 却还是旧版本号
+
+**症状**：pubspec 明明写了 `1.1.0+2`，Settings 仍显示 `1.0.0`、`build/web/version.json` 也是旧的。
+**原因**：`package_info_plus` 读的是**打包时写进产物里的值**，刷新页面 / 热重载都不算重新构建。
+**修法**：`flutter pub get` → 重新 `flutter run` / `flutter build`；web 再核对 `build/web/version.json`。
+
+## 17. 新增一段内容把底部的按钮挤出折叠线
+
+**症状**：`find.byKey(Key('SettingsBack'))` 突然 `findsNothing`，点不到。
+**原因**：Settings 页加了 About 段，600px 测试视口装不下，`ListView` 未滚到底。
+**修法**：测试里 `tester.scrollUntilVisible(finder, 120, scrollable: find.byType(Scrollable).first)`；
+不要为了迁就测试把按钮挪到中间 —— 真机上用户同样要滚。
+
+## 18. 原生插件的能力在别的平台上是「静默不可用」
+
+**症状**：接了 `itchi_flutter_duo_layout` 之后，Android/Web 上什么都不发生；怀疑没接上。
+**原因**：插件 `plugin.platforms` 里只有 `ios`，其他平台返回 `unsupportedPlatform`，这是设计。
+**修法**：所有调用点都按「可能不可用」写（`railActive` 判据 + catch），并给非 iOS 一条完整可用的路径；
+测试里用假 `DuoBridge` 覆盖 available / unsupported / 抛异常三种情况。
+
+## 19. `Image.file` 放进 widget 测试会挂住不返回
+
+**症状**：`flutter test` 跑到某个 `testWidgets` 就停住，几分钟不出结果，`flutter_tester` 进程还在。
+**原因**：`Image.file` 订阅了真实的 `ImageStream`，测试的 fake async 环境里解码永远走不完，
+teardown 一直等它。
+**修法**：不要在 widget 测试里喂真实图片文件 —— 只测「无图时不渲染额外层」这类逻辑分支；
+一定要测真实解码就用 `tester.runAsync(...)`，或者给组件注入 `ImageProvider`。
+
 ## 铁律
 
 1. `flutter analyze` 不干净不动下一步。
@@ -95,4 +123,4 @@
 
 ## 最后核对
 
-2026-11-10，15 条全部仍适用。
+2026-11-17，18 条全部仍适用（16–18 为 Session 4 新增）。

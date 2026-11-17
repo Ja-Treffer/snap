@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../Models/JournalEntry.dart';
+import '../../Utils/app_settings.dart';
 import '../../Utils/journal_store.dart';
 import '../../Utils/photo_store.dart';
 
@@ -15,6 +16,7 @@ class HomePageController extends ChangeNotifier {
   HomePageController({
     JournalStore? store,
     PhotoStore? photos,
+    this.settings,
     this.loadDelay = defaultLoadDelay,
   }) : _store = store ?? JournalStore(),
        _photos = photos ?? PhotoStore();
@@ -23,6 +25,9 @@ class HomePageController extends ChangeNotifier {
 
   /// Injected so tests can shorten or skip the fake loading delay.
   final Duration loadDelay;
+
+  /// Only needed so the orphan sweep knows the background picture is in use.
+  final AppSettings? settings;
 
   final JournalStore _store;
   final PhotoStore _photos;
@@ -146,6 +151,8 @@ class HomePageController extends ChangeNotifier {
     return _photos.deleteUnreferenced(<String>{
       for (final JournalEntry entry in _entries)
         if (entry.photoPath case final String name) name,
+      // The page background lives in the same folder and must survive.
+      if (settings?.backgroundImage case final String background) background,
     });
   }
 }

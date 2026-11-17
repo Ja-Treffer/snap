@@ -59,6 +59,16 @@ HomePage（List，根页，无输入）
 
 漏掉任何一环，表现都是“详情改了，回列表还是旧的”。
 
+## Session 4 之后的三处变化
+
+| 变化 | 位置 |
+|---|---|
+| AppBar 返回键由 `railActive` 决定（原生侧栏已有 Back 时不给第二个） | `DetailPage` / `AddPage` / `SettingsPage`：`automaticallyImplyLeading: !(AppScope.maybeOf(context)?.duo?.railActive ?? false)` |
+| Settings 多一段 About，key `appVersion`，文案 `settings_version{version,build}` | `lib/Pages/Settings/SettingsPage.dart` |
+| 宽窗 / fully open 时首页变两列独立滚动 | `HomePage._twoPaneList`，判据 `DuoLayoutController.wantsTwoPanes(MediaQuery.sizeOf(context))` |
+
+`SettingsBack` 因此在 600px 视口下落到折叠线以下 —— 测试要点它得先 `scrollUntilVisible`。
+
 ## 最后核对
 
-2026-11-10，对照 `lib/Pages/**` 全量核对。
+2026-11-17，对照 `lib/Pages/**` 全量核对。

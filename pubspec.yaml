@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.13.7
@@ -41,6 +41,14 @@ dependencies:
   shared_preferences: ^2.5.6
   intl: ^0.20.3
   permission_handler: ^13.0.2
+  package_info_plus: ^10.2.2
+
+  # Session 4 · PART 04 — native iPhone Duo bridge (side rail Back + fold stream).
+  # iOS-only by design; other platforms answer `unsupportedPlatform` safely.
+  itchi_flutter_duo_layout:
+    git:
+      url: https://github.com/itchitechhk/itchi_flutter_duo_layout.git
+      ref: main
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +62,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   permission_handler_platform_interface: ^4.4.1
   plugin_platform_interface: ^2.1.8
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -99,3 +108,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Session 4 · PART 01 — one 1024×1024 source, every platform size generated.
+# Regenerate with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/icon/icon_1024.png"
+  android: true
+  ios: true
+  # The source has an alpha channel; iOS rejects app icons with alpha.
+  remove_alpha_ios: true
+  min_sdk_android: 21
+

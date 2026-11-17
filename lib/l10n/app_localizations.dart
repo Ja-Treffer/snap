@@ -369,6 +369,54 @@ abstract class AppLocalizations {
   /// **'This cannot be undone.'**
   String get settings_clear_again_body;
 
+  /// No description provided for @settings_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get settings_background;
+
+  /// No description provided for @settings_background_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an image'**
+  String get settings_background_none;
+
+  /// No description provided for @settings_background_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change image'**
+  String get settings_background_change;
+
+  /// No description provided for @settings_background_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove background'**
+  String get settings_background_remove;
+
+  /// No description provided for @settings_background_opacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Opacity'**
+  String get settings_background_opacity;
+
+  /// No description provided for @settings_background_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the gallery.'**
+  String get settings_background_failed;
+
+  /// No description provided for @settings_about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settings_about;
+
+  /// No description provided for @settings_version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} (build {build})'**
+  String settings_version(String version, String build);
+
   /// No description provided for @settings_cleared.
   ///
   /// In en, this message translates to:

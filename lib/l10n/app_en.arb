@@ -73,5 +73,23 @@
   },
   "settings_clear_again_title": "Are you sure?",
   "settings_clear_again_body": "This cannot be undone.",
+  "settings_background": "Background",
+  "settings_background_none": "Choose an image",
+  "settings_background_change": "Change image",
+  "settings_background_remove": "Remove background",
+  "settings_background_opacity": "Opacity",
+  "settings_background_failed": "Could not open the gallery.",
+  "settings_about": "About",
+  "settings_version": "Version {version} (build {build})",
+  "@settings_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "settings_cleared": "Cleared"
 }
