@@ -74,3 +74,11 @@ android/.kotlin/
 # Gradle build output
 /android/build/
 /android/.gradle/
+
+#distribution
+/dist
+
+
+
+# The challenge deliverable is a written artefact, keep it
+!docs/challenge-s4-palette.png
